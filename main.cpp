@@ -18,6 +18,8 @@ main(s32 argc, char const *argv[])
 
   StructAnnotation test_struct_annotation = get_annotated_TestStruct();
 
+  TestStruct test_struct = {};
+
   if (success)
   {
     String file_text = {
@@ -28,26 +30,20 @@ main(s32 argc, char const *argv[])
 
     printf("\n\n## Deserialize ini file\n\n");
 
-    TestStruct *test_struct = (TestStruct*)deserialize_struct(file_text, test_struct_annotation);
-    if (test_struct == 0)
+    success &= deserialize_struct(file_text, test_struct_annotation, &test_struct);
+    if (success)
     {
-      success = false;
-    }
-    else
-    {
-      print_annotated_struct(test_struct_annotation, test_struct);
-
-      printf("\n\n## Serialize to console\n\n");
-
-      Array::Array<char> output = {};
-      serialize_struct(output, test_struct_annotation, test_struct);
-      printf("%.*s\n", output.n_elements, output.elements);
-
-      free(test_struct);
+      print_annotated_struct(test_struct_annotation, &test_struct);
     }
   }
 
   close_file(&file);
+
+  printf("\n\n## Serialize to console\n\n");
+
+  Array::Array<char> output = {};
+  serialize_struct(output, test_struct_annotation, &test_struct);
+  printf("%.*s\n", output.n_elements, output.elements);
 
   if (success)
   {

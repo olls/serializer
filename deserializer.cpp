@@ -5,8 +5,6 @@
 #include "serializable-types.h"
 #include "parse.h"
 
-#include <malloc.h>
-
 
 b32
 parse_value(String text, SerializableType type, void *result)
@@ -40,21 +38,20 @@ parse_value(String text, SerializableType type, void *result)
 }
 
 
-void *
-deserialize_struct(String text, StructAnnotation& struct_annotation)
+b32
+deserialize_struct(String text, StructAnnotation& struct_annotation, void *result)
 {
-  void *result = 0;
+  b32 success = true;
 
   String struct_section = find_section(text, struct_annotation.name);
   if (struct_section.start == 0)
   {
     printf("Could not find stuct section on deserialize\n");
+    success = false;
   }
   else
   {
     // printf("Found section: \"%.*s\"\n\n", STR_PRINT(struct_section));
-
-    result = malloc(struct_annotation.size);
 
     for (u32 member_i = 0;
          member_i < struct_annotation.members.n_elements;
@@ -81,5 +78,5 @@ deserialize_struct(String text, StructAnnotation& struct_annotation)
     }
   }
 
-  return result;
+  return success;
 }

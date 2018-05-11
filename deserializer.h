@@ -5,8 +5,8 @@
 #include "struct-annotator.h"
 
 
-void *
-deserialize_struct(String text, StructAnnotation& struct_annotation);
+b32
+deserialize_struct(String text, StructAnnotation& struct_annotation, void *result);
 
 
 #endif
