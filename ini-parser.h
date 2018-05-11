@@ -6,7 +6,7 @@
 
 
 String
-find_line_starting_with(String text, const char prefix[]);
+find_line_starting_with(String text, String prefix);
 
 
 String
@@ -14,7 +14,7 @@ find_section(String text, String name);
 
 
 String
-get_value(String text, const char name[]);
+get_value(String text, String name);
 
 
 #endif

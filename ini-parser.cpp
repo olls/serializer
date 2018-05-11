@@ -2,12 +2,13 @@
 
 #include "parse.h"
 #include "array.h"
+#include "array-string.h"
 
 #include <stdio.h>
 
 
 String
-find_line_starting_with(String text, const char prefix[])
+find_line_starting_with(String text, String prefix)
 {
   String result = {};
 
@@ -52,9 +53,8 @@ find_section(String text, String name)
   heading += '[';
   Array::add_n(heading, (char*)name.start, STR_LENGTH(name));
   heading += ']';
-  heading += '\0';
 
-  String heading_line = find_line_starting_with(text, heading.elements);
+  String heading_line = find_line_starting_with(text, GET_STRING(heading));
   Array::free_array(heading);
 
   if (heading_line.start != 0)
@@ -72,7 +72,7 @@ find_section(String text, String name)
     {
       line = get_next_line(&result);
       if (result.current_position >= result.end ||
-          string_starts_with(line, "["))
+          string_starts_with(line, STRING("[")))
       {
         found_end = true;
       }
@@ -85,7 +85,7 @@ find_section(String text, String name)
 
 
 String
-get_value(String text, const char name[])
+get_value(String text, String name)
 {
   String result = {};
 
@@ -95,13 +95,12 @@ get_value(String text, const char name[])
   {
     line.current_position = line.start;
 
-    consume_space_tabs(line);
+    CONSUME_WHILE(line, is_space_tabs);
 
-    while (line.current_position[0] != ':')
-      line.current_position += 1;
+    CONSUME_UNTIL_CHAR(line, ':');
     line.current_position += 1;
 
-    consume_space_tabs(line);
+    CONSUME_WHILE(line, is_space_tabs);
 
     if (line.current_position < line.end)
     {

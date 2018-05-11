@@ -31,6 +31,8 @@ struct WriteString
 
 #define SPACE_LEFT(string)  s32((string).end - (string).current_position)
 
+#define STRING(c_string) (String){.start = c_string, .current_position = c_string, .end = c_string + strlen(c_string)}
+
 
 static b32
 append_string(WriteString &string, const char *appendee)

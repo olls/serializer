@@ -1,4 +1,5 @@
 #include "parse.h"
+#include "maths.h"
 
 
 // Returns a String containing the text between the current current_position and the next line-break or end of the input String.
@@ -31,28 +32,26 @@ get_next_line(String *text)
 
 
 b32
-string_starts_with(String text, const char value[])
+string_starts_with(String text, String value)
 {
   b32 result = true;
 
-  if (STR_LENGTH(text) == 0)
+  // text must be larger or equal than value
+  if (STR_LENGTH(text) < STR_LENGTH(value))
   {
     result = false;
   }
-
-  for (u32 i = 0;
-       i < STR_LENGTH(text);
-       ++i)
+  else
   {
-    if (value[i] == '\0')
+    for (u32 i = 0;
+         i < STR_LENGTH(value);
+         ++i)
     {
-      break;
-    }
-
-    if (text.start[i] != value[i])
-    {
-      result = false;
-      break;
+      if (text.start[i] != value.start[i])
+      {
+        result = false;
+        break;
+      }
     }
   }
 
