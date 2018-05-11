@@ -13,8 +13,10 @@
 s32
 main(s32 argc, char const *argv[])
 {
+  b32 success = true;
+
   File file = {};
-  b32 success = open_file("test-file.ini", &file);
+  success = open_file("test-file.ini", &file);
 
   StructAnnotation test_struct_annotation = get_annotated_TestStruct();
 
@@ -39,11 +41,22 @@ main(s32 argc, char const *argv[])
 
   close_file(&file);
 
-  printf("\n\n## Serialize to console\n\n");
+  test_struct.value_a += 1;
+  test_struct.value_b *= 1.01;
+
+  printf("\n\n## Serialize to ini file\n\n");
 
   Array::Array<char> output = {};
   serialize_struct(output, test_struct_annotation, &test_struct);
-  printf("%.*s\n", output.n_elements, output.elements);
+
+  success = open_file("test-file.ini", &file, true, output.n_elements);
+  if (success)
+  {
+    memcpy(file.write_ptr, output.elements, output.n_elements);
+  }
+
+  close_file(&file);
+  Array::free_array(output);
 
   if (success)
   {
