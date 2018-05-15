@@ -4,6 +4,7 @@
 #include "struct-annotator.h"
 #include "serializer.h"
 #include "deserializer.h"
+#include "hashmap.h"
 
 #include "test-file.h"
 
@@ -30,7 +31,7 @@ main(s32 argc, char const *argv[])
       .end = file.read_ptr + file.size
     };
 
-    printf("\n\n## Deserialize ini file\n\n");
+    printf("\n\n# Deserialize ini file\n\n");
 
     success &= deserialize_struct(file_text, test_struct_annotation, &test_struct);
     if (success)
@@ -44,7 +45,7 @@ main(s32 argc, char const *argv[])
   test_struct.value_a += 1;
   test_struct.value_b *= 1.01;
 
-  printf("\n\n## Serialize to ini file\n\n");
+  printf("\n\n# Serialize to ini file\n\n");
 
   Array::Array<char> output = {};
   serialize_struct(output, test_struct_annotation, &test_struct);
@@ -57,6 +58,16 @@ main(s32 argc, char const *argv[])
 
   close_file(&file);
   Array::free_array(output);
+
+  Hashmap::Hashmap<char, u32> animal_map = {};
+  Hashmap::set(animal_map, KEY("cats")) = 10;
+  u32 *cats = Hashmap::get(animal_map, KEY("cats"));
+  if (cats != NULL)
+  {
+    printf("cats = %u\n\n", *cats);
+  }
+
+  Hashmap::self_test();
 
   if (success)
   {
