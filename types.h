@@ -49,10 +49,4 @@ const s64 MIN_S64 = INT64_MIN;
 const s64 MAX_S64 = INT64_MAX;
 
 
-struct vec2 {
-  r32 x;
-  r32 y;
-};
-
-
 #endif

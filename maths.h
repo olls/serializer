@@ -1,6 +1,8 @@
 #ifndef MATHS_H_DEF
 #define MATHS_H_DEF
 
+#include "struct-annotator.h"
+
 #include <math.h>
 
 
@@ -30,6 +32,13 @@ max(s32 a, s32 b)
 {
   return a < b ? a : b;
 }
+
+
+#define vec2_DEF(MEMBER, n) \
+  MEMBER(r32, x, n) \
+  MEMBER(r32, y, n)
+
+ANNOTATED_STRUCT(vec2, vec2_DEF)
 
 
 #endif

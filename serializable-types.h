@@ -1,22 +1,11 @@
 #ifndef SERIALIZABLE_TYPES_H_DEF
 #define SERIALIZABLE_TYPES_H_DEF
 
-
-enum struct SerializableType
-{
-  u32,
-  s32,
-  r32,
-  vec2
-};
+#include "string.h"
 
 
-static const char *TYPE_STRINGS[] = {
-  "u32",
-  "s32",
-  "r32",
-  "vec2"
-};
+b32
+serialize_type(String& type_name, void *data);
 
 
 #endif

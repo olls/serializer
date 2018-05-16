@@ -3,15 +3,15 @@
 
 #include "string.h"
 #include "array.h"
-
 #include "serializable-types.h"
+#include "hashmap.h"
 
 
 struct StructAnnotationMember
 {
   u32 offset;
+  String type_name;
   String name;
-  SerializableType type;
 };
 
 
@@ -21,6 +21,16 @@ struct StructAnnotation
   u32 size;
   Array::Array<StructAnnotationMember> members;
 };
+
+
+static struct StructAnnotations
+{
+  Hashmap::Hashmap<char, StructAnnotation> map;
+} global_struct_annotations = {};
+
+
+StructAnnotation *
+get_struct_annotation(StructAnnotations& struct_annotations, String annotation_name);
 
 
 #define TOKEN_TO_STRING(token) #token
@@ -36,38 +46,45 @@ struct StructAnnotation
                                                                                  \
   member.offset = offsetof(struct_name, member_name);                            \
   STR_SET(member.name, TOKEN_TO_STRING(member_name));                            \
-  member.type = SerializableType::member_type;                                   \
+  STR_SET(member.type_name, TOKEN_TO_STRING(member_type));                       \
                                                                                  \
-  Array::add(result.members, member);                                            \
+  Array::add(annotation.members, member);                                        \
 }
 
-// Defines the struct {...} definition and the struct get_annotation function
+// Defines the struct {...} definition and the struct add_annotation function
 #define ANNOTATED_STRUCT(struct_name, struct_members)                            \
 struct struct_name                                                               \
 {                                                                                \
   struct_members(ANNOTATED_STRUCT_MEMBER_DEF, struct_name)                       \
 };                                                                               \
                                                                                  \
-static StructAnnotation                                                          \
-get_annotated_##struct_name()                                                    \
+static String                                                                    \
+add_annotated_##struct_name(StructAnnotations *struct_annotations)               \
 {                                                                                \
-  StructAnnotation result = {};                                                  \
-  STR_SET(result.name, TOKEN_TO_STRING(struct_name));                            \
+  const char struct_name_cstr[] = TOKEN_TO_STRING(struct_name);                  \
                                                                                  \
-  result.size = sizeof(struct_name);                                             \
+  StructAnnotation &annotation = Hashmap::set(struct_annotations->map,           \
+    struct_name_cstr, strlen(struct_name_cstr));                                 \
+                                                                                 \
+  STR_SET(annotation.name, TOKEN_TO_STRING(struct_name));                        \
+                                                                                 \
+  annotation.members = {};                                                       \
+  annotation.size = sizeof(struct_name);                                         \
                                                                                  \
   struct_members(ANNOTATED_STRUCT_MEMBER_ANNOTATION, struct_name)                \
                                                                                  \
-  return result;                                                                 \
-}
+  return annotation.name;                                                        \
+}                                                                                \
+                                                                                 \
+static String struct_name##_annotation_name = add_annotated_##struct_name(&global_struct_annotations);
 
 
 void
-print_struct_annotation(StructAnnotation& struct_annotation);
+print_struct_annotation(String& struct_annotation_name, StructAnnotations& struct_annotations = global_struct_annotations, u32 indent = 0);
 
 
 void
-print_annotated_struct(StructAnnotation& struct_annotation, void *data);
+print_annotated_struct(String& struct_annotation_name, void *data, StructAnnotations& struct_annotations = global_struct_annotations, u32 indent = 0);
 
 
 #endif

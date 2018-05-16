@@ -2,15 +2,25 @@
 #define TEST_FILE_H_DEF
 
 #include "types.h"
-
+#include "maths.h"
 #include "struct-annotator.h"
+
+
+#define Entity_DEF(M, n) \
+  M(vec2, position, n) \
+  M(vec2, velocity, n) \
+  M(u32, id, n) \
+  M(char, letter, n)
+
+ANNOTATED_STRUCT(Entity, Entity_DEF);
 
 
 #define TestStruct_DEF(MEMBER, n) \
   MEMBER(u32, value_a, n) \
   MEMBER(r32, value_b, n) \
   MEMBER(s32, value_c, n) \
-  MEMBER(vec2, position, n)
+  MEMBER(vec2, position, n) \
+  MEMBER(Entity, child, n)
 
 ANNOTATED_STRUCT(TestStruct, TestStruct_DEF);
 

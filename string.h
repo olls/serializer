@@ -73,4 +73,31 @@ append_string(WriteString &string, String appendee)
 }
 
 
+static b32
+string_eq(String a, String b)
+{
+  b32 result = true;
+
+  if (STR_LENGTH(a) != STR_LENGTH(b))
+  {
+    result = false;
+  }
+  else
+  {
+    for (u32 c = 0;
+         c < STR_LENGTH(a);
+         ++c)
+    {
+      if (a.start[c] != b.start[c])
+      {
+        result = false;
+        break;
+      }
+    }
+  }
+
+  return result;
+}
+
+
 #endif
