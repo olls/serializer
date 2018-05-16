@@ -2,10 +2,11 @@
 #define SERIALIZABLE_TYPES_H_DEF
 
 #include "string.h"
+#include <stdio.h>
 
 
 b32
-serialize_type(String& type_name, void *data);
+serialize_type(String& type_name, void *data, FILE *output);
 
 
 #endif

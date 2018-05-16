@@ -80,11 +80,7 @@ static String struct_name##_annotation_name = add_annotated_##struct_name(&globa
 
 
 void
-print_struct_annotation(String& struct_annotation_name, StructAnnotations& struct_annotations = global_struct_annotations, u32 indent = 0);
-
-
-void
-print_annotated_struct(String& struct_annotation_name, void *data, StructAnnotations& struct_annotations = global_struct_annotations, u32 indent = 0);
+print_struct_annotation(String& struct_annotation_name, FILE *output = stdout, StructAnnotations& struct_annotations = global_struct_annotations, u32 indent = 0);
 
 
 #endif

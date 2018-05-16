@@ -4,7 +4,6 @@
 #include "struct-annotator.h"
 #include "serializer.h"
 #include "deserializer.h"
-#include "hashmap.h"
 
 #include "test-file.h"
 
@@ -16,58 +15,54 @@ main(s32 argc, char const *argv[])
 {
   b32 success = true;
 
-  File file = {};
-  success = open_file("test-file.ini", &file);
-
-  StructAnnotation test_struct_annotation = get_annotated_TestStruct();
+  printf("\n# Struct Annotation\n\n");
+  Hashmap::print_stats(global_struct_annotations.map);
+  print_struct_annotation(TestStruct_annotation_name, stdout);
+  printf("\n");
 
   TestStruct test_struct = {};
 
+  printf("\n# Deserialize data file\n\n");
+
+  File file = {};
+  success &= open_file("test-file.dat", &file);
   if (success)
   {
     String file_text = {
       .start = file.read_ptr,
-      .current_position = file.read_ptr,
-      .end = file.read_ptr + file.size
+      .end = file.read_ptr + file.size,
+      .current_position = file.read_ptr
     };
 
-    printf("\n\n# Deserialize ini file\n\n");
-
-    success &= deserialize_struct(file_text, test_struct_annotation, &test_struct);
+    // success &= deserialize_struct(file_text, TestStruct_annotation_name, &test_struct);
     if (success)
     {
-      print_annotated_struct(test_struct_annotation, &test_struct);
+      serialize_struct(STRING("test_struct"), TestStruct_annotation_name, &test_struct, stdout);
     }
   }
 
   close_file(&file);
 
+  printf("\n# Serialize to stdout\n\n");
+  serialize_struct(STRING("test_struct"), TestStruct_annotation_name, &test_struct, stdout);
+  printf("\n");
+
+  printf("\n# Serialize to data file\n\n");
+
   test_struct.value_a += 1;
   test_struct.value_b *= 1.01;
 
-  printf("\n\n# Serialize to ini file\n\n");
-
-  Array::Array<char> output = {};
-  serialize_struct(output, test_struct_annotation, &test_struct);
-
-  success = open_file("test-file.ini", &file, true, output.n_elements);
-  if (success)
+  FILE *output = fopen("test-file.dat", "w");
+  if (output == NULL)
   {
-    memcpy(file.write_ptr, output.elements, output.n_elements);
+    printf("Failed to open test-file.dat\n");
+    success = false;
   }
-
-  close_file(&file);
-  Array::free_array(output);
-
-  Hashmap::Hashmap<char, u32> animal_map = {};
-  Hashmap::set(animal_map, KEY("cats")) = 10;
-  u32 *cats = Hashmap::get(animal_map, KEY("cats"));
-  if (cats != NULL)
+  else
   {
-    printf("cats = %u\n\n", *cats);
+    serialize_struct(STRING("test_struct"), TestStruct_annotation_name, &test_struct, output);
   }
-
-  Hashmap::self_test();
+  fclose(output);
 
   if (success)
   {

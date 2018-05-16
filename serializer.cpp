@@ -1,91 +1,48 @@
 #include "serializer.h"
 
-#include "test-file.h"
-#include "array-string.h"
 #include "string.h"
+#include "serializable-types.h"
 
-
-// TODO: global hashtable storage for StructAnnotation's
-//       This will enable recursive struct serialization
-
-
-// TODO: create a wrapper for snprintf which writes to Array<char>
+#include <stdio.h>
 
 
 void
-serialize_value(WriteString *output, SerializableType type, void *data)
+serialize_struct(String label, String& struct_name, void *data, FILE *output, StructAnnotations& struct_annotations, u32 indent)
 {
-  b32 success = true;
+  StructAnnotation *struct_annotation = get_struct_annotation(struct_annotations, struct_name);
 
-  s32 characters_written = 0;
-
-  switch (type)
+  if (struct_annotation == NULL)
   {
-    case (SerializableType::u32):
-    {
-      characters_written = snprintf(output->current_position, SPACE_LEFT(*output), "%u", *(u32 *)data);
-    } break;
-    case (SerializableType::s32):
-    {
-      characters_written = snprintf(output->current_position, SPACE_LEFT(*output), "%d", *(s32 *)data);
-    } break;
-    case (SerializableType::r32):
-    {
-      characters_written = snprintf(output->current_position, SPACE_LEFT(*output), "%f", *(r32 *)data);
-    } break;
-    case (SerializableType::vec2):
-    {
-      characters_written = snprintf(output->current_position, SPACE_LEFT(*output), "%f %f", ((vec2*)data)->x, ((vec2*)data)->y);
-    } break;
+    fprintf(output, "%*s%.*s %.*s = ", 2 * indent, "", STR_PRINT(struct_name), STR_PRINT(label));
 
-    default:
+    b32 serialized = serialize_type(struct_name, data, output);
+
+    if (!serialized)
     {
-      char unimplemented[] = "[unimplemented type for serialization]";
-      strcpy(output->current_position, unimplemented);
-      characters_written = strlen(unimplemented);
+      fprintf(output, "[No %.*s annotation]", STR_PRINT(struct_name));
     }
   }
-
-  output->current_position += characters_written;
-  if (output->current_position > output->end)
+  else
   {
-    output->current_position = output->end;
-    printf("Out of space in serialization buffer\n");
+    fprintf(output, "%*s%.*s %.*s = struct %.*s {\n", 2 * indent, "", STR_PRINT(struct_annotation->name), STR_PRINT(label), STR_PRINT(struct_annotation->name));
+
+    for (u32 member_i = 0;
+         member_i < struct_annotation->members.n_elements;
+         ++member_i)
+    {
+      StructAnnotationMember& member = struct_annotation->members[member_i];
+
+      void *member_data = (u8*)data + member.offset;
+
+      serialize_struct(member.name, member.type_name, member_data, output, struct_annotations, indent + 1);
+      fprintf(output, ";\n");
+    }
+    fprintf(output, "%*s}", 2*indent, "");
+
   }
-}
 
-
-void
-serialize_struct(Array::Array<char>& output, StructAnnotation& annotated_struct, void *data)
-{
-  append_string(output, "[");
-  append_string(output, annotated_struct.name);
-  append_string(output, "]\n");
-
-  const u32 buffer_size = 1024;
-  char buffer[buffer_size];
-
-  WriteString value_buffer = {
-    .start = buffer,
-    .end = buffer + buffer_size
-  };
-  for (u32 member_i = 0;
-       member_i < annotated_struct.members.n_elements;
-       ++member_i)
-
+  if (indent == 0)
   {
-    StructAnnotationMember& member_annotation = annotated_struct.members[member_i];
-
-    void *member_data = (u8 *)data + member_annotation.offset;
-
-    append_string(output, member_annotation.name);
-    append_string(output, ": ");
-
-    value_buffer.current_position = value_buffer.start;
-    serialize_value(&value_buffer, member_annotation.type, member_data);
-
-    Array::add_n(output, value_buffer.start, value_buffer.current_position - value_buffer.start);
-    append_string(output, "\n");
+    fprintf(output, ";\n");
   }
-  append_string(output, "\n");
 }
