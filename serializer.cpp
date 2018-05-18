@@ -7,19 +7,19 @@
 
 
 void
-serialize_struct(String label, String& struct_name, void *data, FILE *output, StructAnnotations& struct_annotations, u32 indent)
+serialize_data(String type_name, String label, void *data, FILE *output, StructAnnotations& struct_annotations, u32 indent)
 {
-  StructAnnotation *struct_annotation = get_struct_annotation(struct_annotations, struct_name);
+  StructAnnotation *struct_annotation = get_struct_annotation(struct_annotations, type_name);
 
   if (struct_annotation == NULL)
   {
-    fprintf(output, "%*s%.*s %.*s = ", 2 * indent, "", STR_PRINT(struct_name), STR_PRINT(label));
+    fprintf(output, "%*s%.*s %.*s = ", 2 * indent, "", STR_PRINT(type_name), STR_PRINT(label));
 
-    b32 serialized = serialize_type(struct_name, data, output);
+    b32 serialized = serialize_type(type_name, data, output);
 
     if (!serialized)
     {
-      fprintf(output, "[No %.*s annotation]", STR_PRINT(struct_name));
+      fprintf(output, "[No %.*s annotation]", STR_PRINT(type_name));
     }
   }
   else
@@ -34,7 +34,7 @@ serialize_struct(String label, String& struct_name, void *data, FILE *output, St
 
       void *member_data = (u8*)data + member.offset;
 
-      serialize_struct(member.label, member.type_name, member_data, output, struct_annotations, indent + 1);
+      serialize_data(member.type_name, member.label, member_data, output, struct_annotations, indent + 1);
       fprintf(output, ";\n");
     }
     fprintf(output, "%*s}", 2*indent, "");

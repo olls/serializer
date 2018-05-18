@@ -38,7 +38,7 @@ main(s32 argc, char const *argv[])
     success &= deserialize_value(file_text, TestStruct_annotation_type_name, test_struct_label, &test_struct);
     if (success)
     {
-      serialize_struct(STRING("deserialized_test_struct"), TestStruct_annotation_type_name, &test_struct, stdout);
+      serialize_data(TestStruct_annotation_type_name, STRING("deserialized_test_struct"), &test_struct, stdout);
     }
   }
 
@@ -57,7 +57,7 @@ main(s32 argc, char const *argv[])
   }
   else
   {
-    serialize_struct(test_struct_label, TestStruct_annotation_type_name, &test_struct, output);
+    serialize_data(TestStruct_annotation_type_name, STRING("test_struct"), &test_struct, output);
   }
   fclose(output);
 
