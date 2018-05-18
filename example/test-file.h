@@ -1,9 +1,16 @@
 #ifndef TEST_FILE_H_DEF
 #define TEST_FILE_H_DEF
 
-#include "types.h"
-#include "maths.h"
-#include "struct-annotator.h"
+#include "../libs/types.h"
+
+#include "../serializer/struct-annotator.h"
+
+
+#define vec2_DEF(MEMBER, n) \
+  MEMBER(r32, x, n) \
+  MEMBER(r32, y, n)
+
+ANNOTATED_STRUCT(vec2, vec2_DEF)
 
 
 #define Entity_DEF(M, n) \

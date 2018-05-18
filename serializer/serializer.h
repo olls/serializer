@@ -1,8 +1,9 @@
 #ifndef SERIALIZER_H_DEF
 #define SERIALIZER_H_DEF
 
-#include "types.h"
-#include "string.h"
+#include "../libs/types.h"
+#include "../libs/string.h"
+
 #include "struct-annotator.h"
 
 

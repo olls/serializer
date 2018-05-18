@@ -1,9 +1,10 @@
 #ifndef DESERIALIZER_H_DEF
 #define DESERIALIZER_H_DEF
 
-#include "string.h"
+#include "../libs/fcpp-lexer-1.1/4cpp_lexer_types.h"
+#include "../libs/string.h"
+
 #include "struct-annotator.h"
-#include "fcpp-lexer-1.1/4cpp_lexer_types.h"
 
 
 b32

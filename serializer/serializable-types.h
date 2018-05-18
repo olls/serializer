@@ -1,7 +1,8 @@
 #ifndef SERIALIZABLE_TYPES_H_DEF
 #define SERIALIZABLE_TYPES_H_DEF
 
-#include "string.h"
+#include "../libs/string.h"
+
 #include <stdio.h>
 
 

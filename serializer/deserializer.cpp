@@ -3,8 +3,8 @@
 #include "value-parser.h"
 #include "serializable-types.h"
 #include "parse.h"
-#include "maths.h"
-#include "fcpp-lexer-1.1/4cpp_lexer.h"
+
+#include "../libs/fcpp-lexer-1.1/4cpp_lexer.h"
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 

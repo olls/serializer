@@ -4,8 +4,11 @@
 #ifndef FCPP_LEXER_TYPES_INC
 #define FCPP_LEXER_TYPES_INC
 
+#include <stdint.h>
+
 namespace CppLexer
 {
+
 
 #ifndef ENUM
 #define ENUM(type,name) typedef type name; enum name##_

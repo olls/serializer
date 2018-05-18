@@ -1,0 +1,22 @@
+TestStruct test_struct = struct TestStruct {
+  u32 value_a = 56;
+  r32 value_b = 3.949380;
+  s32 value_c = 0;
+  vec2 position = struct vec2 {
+    r32 x = 1.100001;
+    r32 y = 0.105001;
+  };
+  Entity child = struct Entity {
+    vec2 position = struct vec2 {
+      r32 x = 0.000000;
+      r32 y = 1.234567;
+    };
+    vec2 velocity = struct vec2 {
+      r32 x = 0.000000;
+      r32 y = 0.000000;
+    };
+    u32 id = 0;
+    char letter = 0x00;
+  };
+};
+u32 meaning_of_life = 42;

@@ -1,10 +1,11 @@
 #ifndef STRUCT_ANNOTATOR_H_DEF
 #define STRUCT_ANNOTATOR_H_DEF
 
-#include "string.h"
-#include "array.h"
+#include "../libs/string.h"
+#include "../libs/array.h"
+#include "../libs/hashmap.h"
+
 #include "serializable-types.h"
-#include "hashmap.h"
 
 
 struct StructAnnotationMember

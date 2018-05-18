@@ -1,9 +1,10 @@
-#include "types.h"
-#include "files.h"
-#include "string.h"
-#include "struct-annotator.h"
-#include "serializer.h"
-#include "deserializer.h"
+#include "../libs/types.h"
+#include "../libs/files.h"
+#include "../libs/string.h"
+
+#include "../serializer/struct-annotator.h"
+#include "../serializer/serializer.h"
+#include "../serializer/deserializer.h"
 
 #include "test-file.h"
 
@@ -14,6 +15,8 @@ s32
 main(s32 argc, char const *argv[])
 {
   b32 success = true;
+
+  const char file_name[] = "example/test-file.dat";
 
   printf("\n# Struct Annotation\n\n");
   Hashmap::print_stats(global_struct_annotations.map);
@@ -27,7 +30,7 @@ main(s32 argc, char const *argv[])
   printf("\n# Deserialize data file\n\n");
 
   File file = {};
-  success &= open_file("test-file.dat", &file);
+  success &= open_file(file_name, &file);
   if (success)
   {
     String file_text = {
@@ -61,10 +64,10 @@ main(s32 argc, char const *argv[])
   test_struct.value_a += 1;
   test_struct.value_b *= 1.01;
 
-  FILE *output = fopen("test-file.dat", "w");
+  FILE *output = fopen(file_name, "w");
   if (output == NULL)
   {
-    printf("Failed to open test-file.dat\n");
+    printf("Failed to open %s\n", file_name);
     success = false;
   }
   else

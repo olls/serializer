@@ -1,5 +1,4 @@
 #include "parse.h"
-#include "maths.h"
 
 
 // Returns a String containing the text between the current current_position and the next line-break or end of the input String.

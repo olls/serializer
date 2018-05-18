@@ -1,7 +1,7 @@
 #include "value-parser.h"
 
 #include "parse.h"
-#include "maths.h"
+#include <math.h>
 
 
 b32
