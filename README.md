@@ -79,6 +79,12 @@ would output a struct definition which looks like this:
       char letter;
     };
 
+Note that recursive struct (de)serialization requires all struct-type members used in a struct definition to be defined
+using the annotation macros as well.
+
+`main.cpp` and `test-file.h` contain a setup demonstrating all the features of the library, and how to use it to save
+and load data from a file.
+
 
 ## Unimplemented features
 
