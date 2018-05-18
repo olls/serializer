@@ -22,6 +22,7 @@ serialize_type(String& type_name, void *data, FILE *output)
   else
   if (string_eq(type_name, STRING("r32")))
   {
+    // TODO:  Figure out how to maintain precision, perhaps using a hex output.
     fprintf(output, "%f", *(r32*)data);
   }
   else

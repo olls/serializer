@@ -97,8 +97,6 @@ parse_r32(String *string, r32 *result)
 {
   b32 success = true;
 
-  s32 whole_num = 0;
-
   s32 coef = 1;
   if (string->current_position != string->end)
   {
@@ -119,6 +117,8 @@ parse_r32(String *string, r32 *result)
   CONSUME_WHILE(*string, is_num);
 
   u32 num_length = string->current_position - num_start;
+
+  s32 whole_num = 0;
 
   if (num_length == 0)
   {
@@ -143,26 +143,29 @@ parse_r32(String *string, r32 *result)
     {
       ++string->current_position;
 
-      u32 frac_num = 0;
-      success &= parse_u32(string, &frac_num);
-      if (!success)
+      r32 frac_num = 0;
+
+      const char *frac_start = string->current_position;
+
+      CONSUME_WHILE(*string, is_num);
+      u32 frac_length = string->current_position - frac_start;
+
+      if (frac_length == 0)
       {
+        success = false;
         *result = 0;
       }
       else
       {
-        r32 frac_part = frac_num;
-        while (frac_part >= 1)
+        for (u32 num_pos = 0;
+             num_pos < frac_length;
+             ++num_pos)
         {
-          frac_part /= 10;
+          u32 digit = *(frac_start + num_pos) - '0';
+          frac_num += digit / pow(10, num_pos + 1);
         }
 
-        if (whole_num < 0)
-        {
-          frac_part *= -1;
-        }
-
-        *result += frac_part;
+        *result += frac_num;
       }
     }
 
