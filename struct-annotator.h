@@ -11,13 +11,13 @@ struct StructAnnotationMember
 {
   u32 offset;
   String type_name;
-  String name;
+  String label;
 };
 
 
 struct StructAnnotation
 {
-  String name;
+  String type_name;
   u32 size;
   Array::Array<StructAnnotationMember> members;
 };
@@ -37,15 +37,15 @@ get_struct_annotation(StructAnnotations& struct_annotations, String annotation_n
 
 
 // Used to create the struct {...} definition for each member of the struct
-#define ANNOTATED_STRUCT_MEMBER_DEF(member_type, member_name, struct_name) member_type member_name;
+#define ANNOTATED_STRUCT_MEMBER_DEF(member_type, member_label, struct_name) member_type member_label;
 
 // Used to create the annotation for each member of the struct in the annotation function
-#define ANNOTATED_STRUCT_MEMBER_ANNOTATION(member_type, member_name, struct_name)\
+#define ANNOTATED_STRUCT_MEMBER_ANNOTATION(member_type, member_label, struct_name)\
 {                                                                                \
   StructAnnotationMember member = {};                                            \
                                                                                  \
-  member.offset = offsetof(struct_name, member_name);                            \
-  STR_SET(member.name, TOKEN_TO_STRING(member_name));                            \
+  member.offset = offsetof(struct_name, member_label);                           \
+  STR_SET(member.label, TOKEN_TO_STRING(member_label));                          \
   STR_SET(member.type_name, TOKEN_TO_STRING(member_type));                       \
                                                                                  \
   Array::add(annotation.members, member);                                        \
@@ -66,17 +66,17 @@ add_annotated_##struct_name(StructAnnotations *struct_annotations)              
   StructAnnotation &annotation = Hashmap::set(struct_annotations->map,           \
     struct_name_cstr, strlen(struct_name_cstr));                                 \
                                                                                  \
-  STR_SET(annotation.name, TOKEN_TO_STRING(struct_name));                        \
+  STR_SET(annotation.type_name, TOKEN_TO_STRING(struct_name));                   \
                                                                                  \
   annotation.members = {};                                                       \
   annotation.size = sizeof(struct_name);                                         \
                                                                                  \
   struct_members(ANNOTATED_STRUCT_MEMBER_ANNOTATION, struct_name)                \
                                                                                  \
-  return annotation.name;                                                        \
+  return annotation.type_name;                                                   \
 }                                                                                \
                                                                                  \
-static String struct_name##_annotation_name = add_annotated_##struct_name(&global_struct_annotations);
+static String struct_name##_annotation_type_name = add_annotated_##struct_name(&global_struct_annotations);
 
 
 void

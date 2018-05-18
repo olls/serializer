@@ -98,7 +98,42 @@ parse_r32(String *string, r32 *result)
   b32 success = true;
 
   s32 whole_num = 0;
-  success &= parse_s32(string, &whole_num);
+
+  s32 coef = 1;
+  if (string->current_position != string->end)
+  {
+    if (*string->current_position == '-')
+    {
+      ++string->current_position;
+      coef = -1;
+    }
+    else if (*string->current_position == '+')
+    {
+      ++string->current_position;
+      coef = 1;
+    }
+  }
+
+  const char *num_start = string->current_position;
+
+  CONSUME_WHILE(*string, is_num);
+
+  u32 num_length = string->current_position - num_start;
+
+  if (num_length == 0)
+  {
+    success = false;
+  }
+  else
+  {
+    for (u32 num_pos = 0;
+         num_pos < num_length;
+         ++num_pos)
+    {
+      u32 digit = *(num_start + num_pos) - '0';
+      whole_num += digit * pow(10, (num_length - num_pos - 1));
+    }
+  }
 
   if (success)
   {
@@ -129,6 +164,84 @@ parse_r32(String *string, r32 *result)
 
         *result += frac_part;
       }
+    }
+
+  }
+
+  *result = (*result) * coef;
+
+  return success;
+}
+
+
+b32
+parse_char(String *text, char *result)
+{
+  b32 success = true;
+
+  if (text->current_position[0] == '\'')
+  {
+    text->current_position += 1;
+
+    if (text->current_position >= text->end)
+    {
+      success = false;
+    }
+    else
+    {
+      if (text->current_position[0] == '\\')
+      {
+        text->current_position += 1;
+        if (text->current_position >= text->end)
+        {
+          success = false;
+        }
+        else
+        {
+          switch (text->current_position[0])
+          {
+            case ('\\'):
+              *result = '\\';
+              break;
+            case ('n'):
+              *result = '\n';
+              break;
+            case ('t'):
+              *result = '\t';
+              break;
+            case ('\''):
+              *result = '\'';
+              break;
+            default:
+              success = false;
+          }
+          text->current_position += 1;
+        }
+      }
+      else
+      {
+        *result = text->current_position[0];
+        text->current_position += 1;
+      }
+    }
+
+    if (text->current_position >= text->end ||
+        text->current_position[0] != '\'')
+    {
+      success = false;
+    }
+    else
+    {
+      text->current_position += 1;
+    }
+  }
+  else
+  {
+    u32 integer_constant = 0;
+    success = parse_u32(text, &integer_constant);
+    if (success)
+    {
+      *result = integer_constant;
     }
   }
 

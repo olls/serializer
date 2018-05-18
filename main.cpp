@@ -17,10 +17,11 @@ main(s32 argc, char const *argv[])
 
   printf("\n# Struct Annotation\n\n");
   Hashmap::print_stats(global_struct_annotations.map);
-  print_struct_annotation(TestStruct_annotation_name, stdout);
+  print_struct_annotation(TestStruct_annotation_type_name, stdout);
   printf("\n");
 
   TestStruct test_struct = {};
+  String test_struct_label= STRING("test_struct");
 
   printf("\n# Deserialize data file\n\n");
 
@@ -34,18 +35,14 @@ main(s32 argc, char const *argv[])
       .current_position = file.read_ptr
     };
 
-    // success &= deserialize_struct(file_text, TestStruct_annotation_name, &test_struct);
+    success &= deserialize_value(file_text, TestStruct_annotation_type_name, test_struct_label, &test_struct);
     if (success)
     {
-      serialize_struct(STRING("test_struct"), TestStruct_annotation_name, &test_struct, stdout);
+      serialize_struct(STRING("deserialized_test_struct"), TestStruct_annotation_type_name, &test_struct, stdout);
     }
   }
 
   close_file(&file);
-
-  printf("\n# Serialize to stdout\n\n");
-  serialize_struct(STRING("test_struct"), TestStruct_annotation_name, &test_struct, stdout);
-  printf("\n");
 
   printf("\n# Serialize to data file\n\n");
 
@@ -60,7 +57,7 @@ main(s32 argc, char const *argv[])
   }
   else
   {
-    serialize_struct(STRING("test_struct"), TestStruct_annotation_name, &test_struct, output);
+    serialize_struct(test_struct_label, TestStruct_annotation_type_name, &test_struct, output);
   }
   fclose(output);
 

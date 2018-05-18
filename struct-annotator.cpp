@@ -25,7 +25,7 @@ print_struct_annotation(String& struct_annotation_name, FILE *output, StructAnno
   }
   else
   {
-    printf("struct %.*s {\n", STR_PRINT(struct_annotation->name));
+    printf("struct %.*s {\n", STR_PRINT(struct_annotation->type_name));
 
     for (u32 member_i = 0;
          member_i < struct_annotation->members.n_elements;
@@ -36,7 +36,7 @@ print_struct_annotation(String& struct_annotation_name, FILE *output, StructAnno
 
       print_struct_annotation(member.type_name, output, struct_annotations, indent + 1);
 
-      printf(" %.*s;\n", STR_PRINT(member.name));
+      printf(" %.*s;\n", STR_PRINT(member.label));
     }
 
     printf("%*s}", 2*indent, "");

@@ -22,4 +22,8 @@ b32
 parse_r32(String *text, r32 *result);
 
 
+b32
+parse_char(String *text, char *result);
+
+
 #endif
