@@ -341,7 +341,7 @@ parse_atomic_type_tokens(String text, TokenArray tokens, TokenArrayRange token_r
 
   if (!success)
   {
-    printf("Parsing error for type %.*s\n", STR_PRINT(type_name));
+    printf("Parsing error for type %.*s.\n", STR_PRINT(type_name));
   }
 
   return success;
@@ -391,7 +391,7 @@ parse_value_tokens(String text, TokenArray tokens, TokenArrayRange token_range, 
 
         if (!success)
         {
-          printf("Failed to deserialize %.*s %.*s\n", STR_PRINT(member.type_name), STR_PRINT(member.label));
+          printf("Failed to deserialize %.*s %.*s.\n", STR_PRINT(member.type_name), STR_PRINT(member.label));
           break;
         }
       }

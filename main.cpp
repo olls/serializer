@@ -17,11 +17,12 @@ main(s32 argc, char const *argv[])
 
   printf("\n# Struct Annotation\n\n");
   Hashmap::print_stats(global_struct_annotations.map);
-  print_struct_annotation(TestStruct_annotation_type_name, stdout);
+  print_struct_annotation(TestStruct_annotation_type_name);
   printf("\n");
 
   TestStruct test_struct = {};
-  String test_struct_label= STRING("test_struct");
+
+  u32 meaning_of_life = 0;
 
   printf("\n# Deserialize data file\n\n");
 
@@ -35,11 +36,22 @@ main(s32 argc, char const *argv[])
       .current_position = file.read_ptr
     };
 
-    success &= deserialize_value(file_text, TestStruct_annotation_type_name, test_struct_label, &test_struct);
-    if (success)
+    b32 test_struct_deserialized = deserialize_value(file_text, TestStruct_annotation_type_name, STRING("test_struct"), &test_struct);
+    if (test_struct_deserialized)
     {
-      serialize_data(TestStruct_annotation_type_name, STRING("deserialized_test_struct"), &test_struct, stdout);
+      serialize_data(TestStruct_annotation_type_name, STRING("deserialized_test_struct"), &test_struct);
     }
+    printf("\n");
+
+    b32 meaning_of_life_deserialized = deserialize_value(file_text, STRING("u32"), STRING("meaning_of_life"), &meaning_of_life);
+    if (meaning_of_life_deserialized)
+    {
+      serialize_data(STRING("u32"), STRING("deserialized_meaning_of_life"), &meaning_of_life);
+    }
+    printf("\n");
+
+    success &= test_struct_deserialized;
+    success &= meaning_of_life_deserialized;
   }
 
   close_file(&file);
@@ -58,6 +70,7 @@ main(s32 argc, char const *argv[])
   else
   {
     serialize_data(TestStruct_annotation_type_name, STRING("test_struct"), &test_struct, output);
+    serialize_data(STRING("u32"), STRING("meaning_of_life"), &meaning_of_life, output);
   }
   fclose(output);
 
