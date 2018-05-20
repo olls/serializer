@@ -6,11 +6,14 @@
 #include "../serializer/struct-annotator.h"
 
 
-#define vec2_DEF(MEMBER, n) \
-  MEMBER(r32, x, n) \
-  MEMBER(r32, y, n)
+ANNOTATED_TYPEDEF(float, real);
 
-ANNOTATED_STRUCT(vec2, vec2_DEF)
+
+#define vec2_DEF(MEMBER, n) \
+  MEMBER(real, x, n) \
+  MEMBER(real, y, n)
+
+ANNOTATED_STRUCT(vec2, vec2_DEF);
 
 
 #define Entity_DEF(M, n) \

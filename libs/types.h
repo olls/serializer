@@ -3,10 +3,6 @@
 
 #include <stdint.h>
 
-/// @file
-/// @brief  Custom typedefs and type bounds.
-///
-
 
 typedef uint64_t u64;
 typedef uint32_t u32;

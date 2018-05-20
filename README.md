@@ -90,4 +90,4 @@ use it to save and load data from a file.
 
 Currently the following items are not implemented, hopefully they will be in the future:
 - Arrays / Strings
-- Annotated typedefs, eg: u32, s32, r32, char are currently the only implemented atomic types.
+- Fully fledged typedefs:  Currently you can typedef one of the built in types: uint32_t, int32_t, float, bool, char

@@ -298,13 +298,13 @@ parse_atomic_type_tokens(String text, TokenArray tokens, TokenArrayRange token_r
     CppLexer::CPP_TOKEN_INTEGER_CONSTANT
   };
 
-  if (string_eq(type_name, STRING("u32")) &&
+  if (string_eq(type_name, STRING("uint32_t")) &&
       token_sequence_matches(tokens, token_range, ARRAY_SIZE(u32_sequence), u32_sequence))
   {
     success &= parse_u32(&token_text, (u32*)result);
   }
   else
-  if (string_eq(type_name, STRING("s32")) &&
+  if (string_eq(type_name, STRING("int32_t")) &&
       (token_sequence_matches(tokens, token_range, ARRAY_SIZE(s32_sequence_a), s32_sequence_a) ||
        token_sequence_matches(tokens, token_range, ARRAY_SIZE(s32_sequence_b), s32_sequence_b) ||
        token_sequence_matches(tokens, token_range, ARRAY_SIZE(s32_sequence_c), s32_sequence_c)))
@@ -312,7 +312,7 @@ parse_atomic_type_tokens(String text, TokenArray tokens, TokenArrayRange token_r
     success &= parse_s32(&token_text, (s32*)result);
   }
   else
-  if (string_eq(type_name, STRING("r32")) &&
+  if (string_eq(type_name, STRING("float")) &&
       (token_sequence_matches(tokens, token_range, ARRAY_SIZE(r32_sequence_a), r32_sequence_a) ||
        token_sequence_matches(tokens, token_range, ARRAY_SIZE(r32_sequence_b), r32_sequence_b) ||
        token_sequence_matches(tokens, token_range, ARRAY_SIZE(r32_sequence_c), r32_sequence_c)))
@@ -320,7 +320,7 @@ parse_atomic_type_tokens(String text, TokenArray tokens, TokenArrayRange token_r
     success &= parse_r32(&token_text, (r32*)result);
   }
   else
-  if (string_eq(type_name, STRING("b32")) &&
+  if (string_eq(type_name, STRING("bool")) &&
       token_sequence_matches(tokens, token_range, ARRAY_SIZE(b32_sequence), b32_sequence))
   {
     printf("Parsing bool:  Unimplemented\n");
@@ -357,9 +357,18 @@ parse_value_tokens(String text, TokenArray tokens, TokenArrayRange token_range, 
 
   StructAnnotation *struct_annotation = get_struct_annotation(struct_annotations, type_name);
 
+  String deserializable_type_name = type_name;
+
+  if (struct_annotation != NULL &&
+      struct_annotation->type_alias)
+  {
+    deserializable_type_name = struct_annotation->aliased_type;
+    struct_annotation = NULL;
+  }
+
   if (struct_annotation == NULL)
   {
-    success &= parse_atomic_type_tokens(text, tokens, token_range, type_name, result);
+    success &= parse_atomic_type_tokens(text, tokens, token_range, deserializable_type_name, result);
   }
   else
   {

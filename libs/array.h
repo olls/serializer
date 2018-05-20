@@ -75,12 +75,6 @@ namespace Array
         elements(0)
     {}
 
-    // De-constructor: Free heap allocation
-    ~Array()
-    {
-      free_array(*this);
-    }
-
     // Convenience operators
 
     T &

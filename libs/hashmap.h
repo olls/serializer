@@ -33,13 +33,6 @@ namespace Hashmap
       u32 collision_count;
       u32 n_items;
     } stats;
-
-    // Constructor to zero members
-    Hashmap()
-    {
-      memset(this->map, 0, n_slots*sizeof(HashSlot));
-    }
-
   };
 
 

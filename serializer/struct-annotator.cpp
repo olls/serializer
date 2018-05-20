@@ -24,21 +24,28 @@ print_struct_annotation(String& struct_annotation_name, FILE *output, StructAnno
   }
   else
   {
-    printf("struct %.*s {\n", STR_PRINT(struct_annotation->type_name));
-
-    for (u32 member_i = 0;
-         member_i < struct_annotation->members.n_elements;
-         ++member_i)
+    if (struct_annotation->type_alias)
     {
-      StructAnnotationMember& member = struct_annotation->members[member_i];
-      printf("%*s", 2*(indent + 1), "");
-
-      print_struct_annotation(member.type_name, output, struct_annotations, indent + 1);
-
-      printf(" %.*s;\n", STR_PRINT(member.label));
+      printf("(%.*s -> %.*s)", STR_PRINT(struct_annotation->type_name), STR_PRINT(struct_annotation->aliased_type));
     }
+    else
+    {
+      printf("struct %.*s {\n", STR_PRINT(struct_annotation->type_name));
 
-    printf("%*s}", 2*indent, "");
+      for (u32 member_i = 0;
+           member_i < struct_annotation->members.n_elements;
+           ++member_i)
+      {
+        StructAnnotationMember& member = struct_annotation->members[member_i];
+        printf("%*s", 2*(indent + 1), "");
+
+        print_struct_annotation(member.type_name, output, struct_annotations, indent + 1);
+
+        printf(" %.*s;\n", STR_PRINT(member.label));
+      }
+
+      printf("%*s}", 2*indent, "");
+    }
   }
 
   if (indent == 0)
