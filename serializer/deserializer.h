@@ -8,7 +8,7 @@
 
 
 b32
-deserialize_value(String text, String type_name, String label, void *result, StructAnnotations& struct_annotations = global_struct_annotations);
+deserialize_value(String text, const char *type_name, const char *label, void *result, StructAnnotations& struct_annotations = global_struct_annotations);
 
 
 #endif

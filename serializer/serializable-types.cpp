@@ -1,32 +1,32 @@
 #include "serializable-types.h"
 
-#include "string.h"
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
 
 
 b32
-serialize_type(String& type_name, void *data, FILE *output)
+serialize_type(const char *type_name, void *data, FILE *output)
 {
   b32 result = true;
 
-  if (string_eq(type_name, STRING("uint32_t")))
+  if (strcmp(type_name, "uint32_t") == 0)
   {
     fprintf(output, "%u", *(u32*)data);
   }
   else
-  if (string_eq(type_name, STRING("int32_t")))
+  if (strcmp(type_name, "int32_t") == 0)
   {
     fprintf(output, "%d", *(s32*)data);
   }
   else
-  if (string_eq(type_name, STRING("float")))
+  if (strcmp(type_name, "float") == 0)
   {
     // TODO:  Figure out how to maintain precision, perhaps using a hex output.
     fprintf(output, "%f", *(r32*)data);
   }
   else
-  if (string_eq(type_name, STRING("char")))
+  if (strcmp(type_name, "char") == 0)
   {
     char c = *(char*)data;
     if (isprint(c) &&

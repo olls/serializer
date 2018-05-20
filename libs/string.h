@@ -74,11 +74,11 @@ append_string(WriteString &string, String appendee)
 
 
 static b32
-string_eq(String a, String b)
+string_eq(String a, const char *b)
 {
   b32 result = true;
 
-  if (STR_LENGTH(a) != STR_LENGTH(b))
+  if (STR_LENGTH(a) != strlen(b))
   {
     result = false;
   }
@@ -88,7 +88,7 @@ string_eq(String a, String b)
          c < STR_LENGTH(a);
          ++c)
     {
-      if (a.start[c] != b.start[c])
+      if (a.start[c] != b[c])
       {
         result = false;
         break;

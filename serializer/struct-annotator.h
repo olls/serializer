@@ -1,7 +1,6 @@
 #ifndef STRUCT_ANNOTATOR_H_DEF
 #define STRUCT_ANNOTATOR_H_DEF
 
-#include "../libs/string.h"
 #include "../libs/array.h"
 #include "../libs/hashmap.h"
 
@@ -11,14 +10,14 @@
 struct StructAnnotationMember
 {
   u32 offset;
-  String type_name;
-  String label;
+  const char *type_name;
+  const char *label;
 };
 
 
 struct StructAnnotation
 {
-  String type_name;
+  const char *type_name;
   u32 size;
 
   b32 type_alias;
@@ -26,7 +25,7 @@ struct StructAnnotation
   union
   {
     Array::Array<StructAnnotationMember> members;
-    String aliased_type;
+    const char *aliased_type;
   };
 };
 
@@ -38,7 +37,7 @@ static struct StructAnnotations
 
 
 StructAnnotation *
-get_struct_annotation(StructAnnotations& struct_annotations, String annotation_name);
+get_struct_annotation(StructAnnotations& struct_annotations, const char *annotation_name);
 
 
 #define TOKEN_TO_STRING(token) #token
@@ -53,8 +52,8 @@ get_struct_annotation(StructAnnotations& struct_annotations, String annotation_n
   StructAnnotationMember member = {};                                            \
                                                                                  \
   member.offset = offsetof(struct_name, member_label);                           \
-  STR_SET(member.label, TOKEN_TO_STRING(member_label));                          \
-  STR_SET(member.type_name, TOKEN_TO_STRING(member_type));                       \
+  member.label = TOKEN_TO_STRING(member_label);                                  \
+  member.type_name = TOKEN_TO_STRING(member_type);                               \
                                                                                  \
   Array::add(annotation.members, member);                                        \
 }
@@ -66,15 +65,15 @@ struct struct_name                                                              
   struct_members(ANNOTATED_STRUCT_MEMBER_DEF, struct_name)                       \
 };                                                                               \
                                                                                  \
-static String                                                                    \
+static const char *                                                              \
 add_annotated_##struct_name(StructAnnotations *struct_annotations)               \
 {                                                                                \
-  const char struct_name_cstr[] = TOKEN_TO_STRING(struct_name);                  \
+  const char struct_name_str[] = TOKEN_TO_STRING(struct_name);                   \
                                                                                  \
   StructAnnotation &annotation = Hashmap::set(struct_annotations->map,           \
-    struct_name_cstr, strlen(struct_name_cstr));                                 \
+    struct_name_str, strlen(struct_name_str));                                   \
                                                                                  \
-  STR_SET(annotation.type_name, TOKEN_TO_STRING(struct_name));                   \
+  annotation.type_name = TOKEN_TO_STRING(struct_name);                           \
                                                                                  \
   annotation.type_alias = false;                                                 \
   annotation.members = {};                                                       \
@@ -85,13 +84,13 @@ add_annotated_##struct_name(StructAnnotations *struct_annotations)              
   return annotation.type_name;                                                   \
 }                                                                                \
                                                                                  \
-static String struct_name##_annotation_type_name = add_annotated_##struct_name(&global_struct_annotations)
+static const char *struct_name##_annotation_type_name = add_annotated_##struct_name(&global_struct_annotations)
 
 
 #define ANNOTATED_TYPEDEF(aliased_type_name, type_name_alias)                    \
 typedef aliased_type_name type_name_alias;                                       \
                                                                                  \
-static String                                                                    \
+static const char *                                                              \
 add_annotated_##type_name_alias(StructAnnotations *struct_annotations)           \
 {                                                                                \
   const char type_name_alias_cstr[] = TOKEN_TO_STRING(type_name_alias);          \
@@ -99,20 +98,20 @@ add_annotated_##type_name_alias(StructAnnotations *struct_annotations)          
   StructAnnotation& annotation = Hashmap::set(struct_annotations->map,           \
     type_name_alias_cstr, strlen(type_name_alias_cstr));                         \
                                                                                  \
-  STR_SET(annotation.type_name, TOKEN_TO_STRING(type_name_alias));               \
+  annotation.type_name = TOKEN_TO_STRING(type_name_alias);                       \
                                                                                  \
   annotation.type_alias = true;                                                  \
   annotation.size = sizeof(type_name_alias);                                     \
-  STR_SET(annotation.aliased_type, TOKEN_TO_STRING(aliased_type_name));          \
+  annotation.aliased_type = TOKEN_TO_STRING(aliased_type_name);                  \
                                                                                  \
   return annotation.type_name;                                                   \
 }                                                                                \
                                                                                  \
-static String type_name_alias##_annotation_type_name = add_annotated_##type_name_alias(&global_struct_annotations)
+static const char *type_name_alias##_annotation_type_name = add_annotated_##type_name_alias(&global_struct_annotations)
 
 
 void
-print_struct_annotation(String& struct_annotation_name, FILE *output = stdout, StructAnnotations& struct_annotations = global_struct_annotations, u32 indent = 0);
+print_struct_annotation(const char *struct_annotation_name, FILE *output = stdout, StructAnnotations& struct_annotations = global_struct_annotations, u32 indent = 0);
 
 
 ANNOTATED_TYPEDEF(uint64_t, u64);

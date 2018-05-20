@@ -2,7 +2,6 @@
 
 #include "value-parser.h"
 #include "serializable-types.h"
-#include "parse.h"
 
 #include "../libs/fcpp-lexer-1.1/4cpp_lexer.h"
 
@@ -109,7 +108,7 @@ find_matching_brace_token(TokenArray tokens, TokenArrayRange token_range)
 //   the token range of its value.
 //
 TokenArrayRange
-find_value_in_tokens(String text, TokenArray tokens, TokenArrayRange token_range, String type_name, String label)
+find_value_in_tokens(String text, TokenArray tokens, TokenArrayRange token_range, const char *type_name, const char *label)
 {
   TokenArrayRange result = {-1};
 
@@ -204,7 +203,7 @@ find_value_in_tokens(String text, TokenArray tokens, TokenArrayRange token_range
 
 
 TokenArrayRange
-get_struct_contents(String text, TokenArray tokens, TokenArrayRange token_range, String type_name)
+get_struct_contents(String text, TokenArray tokens, TokenArrayRange token_range, const char *type_name)
 {
   TokenArrayRange result = {-1};
 
@@ -245,7 +244,7 @@ print_token_range_string(String text, TokenArray tokens, TokenArrayRange token_r
 
 
 b32
-parse_atomic_type_tokens(String text, TokenArray tokens, TokenArrayRange token_range, String type_name, void *result)
+parse_atomic_type_tokens(String text, TokenArray tokens, TokenArrayRange token_range, const char *type_name, void *result)
 {
   b32 success = true;
 
@@ -298,13 +297,13 @@ parse_atomic_type_tokens(String text, TokenArray tokens, TokenArrayRange token_r
     CppLexer::CPP_TOKEN_INTEGER_CONSTANT
   };
 
-  if (string_eq(type_name, STRING("uint32_t")) &&
+  if (strcmp(type_name, "uint32_t") == 0 &&
       token_sequence_matches(tokens, token_range, ARRAY_SIZE(u32_sequence), u32_sequence))
   {
     success &= parse_u32(&token_text, (u32*)result);
   }
   else
-  if (string_eq(type_name, STRING("int32_t")) &&
+  if (strcmp(type_name, "int32_t") == 0 &&
       (token_sequence_matches(tokens, token_range, ARRAY_SIZE(s32_sequence_a), s32_sequence_a) ||
        token_sequence_matches(tokens, token_range, ARRAY_SIZE(s32_sequence_b), s32_sequence_b) ||
        token_sequence_matches(tokens, token_range, ARRAY_SIZE(s32_sequence_c), s32_sequence_c)))
@@ -312,7 +311,7 @@ parse_atomic_type_tokens(String text, TokenArray tokens, TokenArrayRange token_r
     success &= parse_s32(&token_text, (s32*)result);
   }
   else
-  if (string_eq(type_name, STRING("float")) &&
+  if (strcmp(type_name, "float") == 0 &&
       (token_sequence_matches(tokens, token_range, ARRAY_SIZE(r32_sequence_a), r32_sequence_a) ||
        token_sequence_matches(tokens, token_range, ARRAY_SIZE(r32_sequence_b), r32_sequence_b) ||
        token_sequence_matches(tokens, token_range, ARRAY_SIZE(r32_sequence_c), r32_sequence_c)))
@@ -320,7 +319,7 @@ parse_atomic_type_tokens(String text, TokenArray tokens, TokenArrayRange token_r
     success &= parse_r32(&token_text, (r32*)result);
   }
   else
-  if (string_eq(type_name, STRING("bool")) &&
+  if (strcmp(type_name, "bool") == 0 &&
       token_sequence_matches(tokens, token_range, ARRAY_SIZE(b32_sequence), b32_sequence))
   {
     printf("Parsing bool:  Unimplemented\n");
@@ -328,7 +327,7 @@ parse_atomic_type_tokens(String text, TokenArray tokens, TokenArrayRange token_r
     // success &= parse_b32(&token_text, (b32*)result);
   }
   else
-  if (string_eq(type_name, STRING("char")) &&
+  if (strcmp(type_name, "char") == 0 &&
       (token_sequence_matches(tokens, token_range, ARRAY_SIZE(char_sequence_a), char_sequence_a) ||
        token_sequence_matches(tokens, token_range, ARRAY_SIZE(char_sequence_b), char_sequence_b)))
   {
@@ -341,7 +340,7 @@ parse_atomic_type_tokens(String text, TokenArray tokens, TokenArrayRange token_r
 
   if (!success)
   {
-    printf("Parsing error for type %.*s.\n", STR_PRINT(type_name));
+    printf("Parsing error for type %s.\n", type_name);
   }
 
   return success;
@@ -349,14 +348,14 @@ parse_atomic_type_tokens(String text, TokenArray tokens, TokenArrayRange token_r
 
 
 b32
-parse_value_tokens(String text, TokenArray tokens, TokenArrayRange token_range, String type_name, void *result, StructAnnotations& struct_annotations)
+parse_value_tokens(String text, TokenArray tokens, TokenArrayRange token_range, const char *type_name, void *result, StructAnnotations& struct_annotations)
 {
   b32 success = true;
 
   // printf("Tokens for %.*s value: ", STR_PRINT(type_name));  print_token_range_string(text, tokens, token_range);  printf("\n");
 
   StructAnnotation *struct_annotation = get_struct_annotation(struct_annotations, type_name);
-  String aliased_type_name = type_name;
+  const char *aliased_type_name = type_name;
   while (struct_annotation != NULL &&
          struct_annotation->type_alias)
   {
@@ -398,7 +397,7 @@ parse_value_tokens(String text, TokenArray tokens, TokenArrayRange token_range, 
 
         if (!success)
         {
-          printf("Failed to deserialize %.*s %.*s.\n", STR_PRINT(member.type_name), STR_PRINT(member.label));
+          printf("Failed to deserialize %s %s.\n", member.type_name, member.label);
           break;
         }
       }
@@ -410,7 +409,7 @@ parse_value_tokens(String text, TokenArray tokens, TokenArrayRange token_range, 
 
 
 b32
-deserialize_value(String text, String type_name, String label, void *result, StructAnnotations& struct_annotations)
+deserialize_value(String text, const char *type_name, const char *label, void *result, StructAnnotations& struct_annotations)
 {
   b32 success = true;
 

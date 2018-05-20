@@ -9,10 +9,10 @@ A simple C++ serializer for saving and loading struct data to and from text.
 
 `serialize_data()` is used to convert a data type into text.
 
-    void serialize_data(String type_name, String label, void *data, FILE *output = stdout);
+    void serialize_data(const char *type_name, const char *label, void *data, FILE *output = stdout);
 
-- `type_name`:  The string containing the type name of the data you are outputting.
-- `label`:      A string containing a label for the object you are outputting, this is the same label you use to
+- `type_name`:  The C-string containing the type name of the data you are outputting.
+- `label`:      A C-string containing a label for the object you are outputting, this is the same label you use to
                   retrieve the data from the text when deserializing.
 - `data`:       Pointer to the data you are outputting.  This is assumed have size equal to `sizeof(type_name)`.
 - `output`:     The FILE stream to output the serialized data to.  This is where you can put your file stream to output
@@ -21,7 +21,7 @@ A simple C++ serializer for saving and loading struct data to and from text.
 #### Example
 
     r32 pizza_time = 12.5;
-    serialize_data(STRING("s32"), STRING("pizza_time"), &pizza_time);
+    serialize_data("s32", "pizza_time", &pizza_time);
 
 Will print `r32 pizza_time = 12.500000;` to stdout:
 
@@ -30,25 +30,25 @@ Will print `r32 pizza_time = 12.500000;` to stdout:
 
 `deserialize_value()` is used to read serialized data back in from text data.
 
-    b32 deserialize_value(String text, String type_name, String label, void *result);
+    b32 deserialize_value(String text, const char *type_name, const char *label, void *result);
 
 - `text`:       The text containing the serialized values.
-- `type_name`:  A string containing the type name of the value you wish to read in.  This should be the same type used
+- `type_name`:  A C-string containing the type name of the value you wish to read in.  This should be the same type used
                   for the `serialize_data()` `type_name` parameter.
-- `label`:      A string containing the label of the value you wish to read in.  This should be the same type used for
+- `label`:      A C-string containing the label of the value you wish to read in.  This should be the same type used for
                   the `serialize_data()` `label` parameter.
 - `result`:     A pointer to a `type_name` object, or memory with size equal to `sizeof(type_name)`.
 
 #### Example
 
     String file_text = STRING("r32 pizza_time = 12.500000;");
-    r32 pizza_time_deserialized;
 
-    deserialize_value(file_text, STRING("r32"), STRING("pizza_time"), &pizza_time_deserialized);
+    r32 pizza_time_deserialized;
+    deserialize_value(file_text, "r32", "pizza_time", &pizza_time_deserialized);
 
     printf("pizza_time: %f\n", pizza_time_deserialized);
 
-Would output `pizza_time: 12.500000` to stdout.
+`deserialize_value()` will search the string for the `pizza_time` label, and output `pizza_time: 12.500000` to stdout.
 
 
 ### Annotated Typedefs

@@ -1,15 +1,7 @@
 #ifndef PARSE_H_DEF
 #define PARSE_H_DEF
 
-#include "../libs/string.h"
-
-
-String
-get_next_line(String *text);
-
-
-b32
-string_starts_with(String text, String value);
+#include "types.h"
 
 
 static inline b32

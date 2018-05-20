@@ -1,18 +1,17 @@
 #include "serializer.h"
 
-#include "string.h"
 #include "serializable-types.h"
 
 #include <stdio.h>
 
 
 void
-serialize_data(String type_name, String label, void *data, FILE *output, StructAnnotations& struct_annotations, u32 indent)
+serialize_data(const char *type_name, const char *label, void *data, FILE *output, StructAnnotations& struct_annotations, u32 indent)
 {
-  fprintf(output, "%*s%.*s %.*s = ", 2 * indent, "", STR_PRINT(type_name), STR_PRINT(label));
+  fprintf(output, "%*s%s %s = ", 2 * indent, "", type_name, label);
 
   StructAnnotation *struct_annotation = get_struct_annotation(struct_annotations, type_name);
-  String aliased_type_name = type_name;
+  const char *aliased_type_name = type_name;
   while (struct_annotation != NULL &&
          struct_annotation->type_alias)
   {
@@ -26,12 +25,12 @@ serialize_data(String type_name, String label, void *data, FILE *output, StructA
 
     if (!serialized)
     {
-      fprintf(output, "[No %.*s annotation]", STR_PRINT(type_name));
+      fprintf(output, "[No %s annotation]", type_name);
     }
   }
   else
   {
-    fprintf(output, "struct %.*s {\n", STR_PRINT(type_name));
+    fprintf(output, "struct %s {\n", type_name);
 
     for (u32 member_i = 0;
          member_i < struct_annotation->members.n_elements;
