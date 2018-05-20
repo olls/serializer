@@ -51,6 +51,16 @@ Will print `r32 pizza_time = 12.500000;` to stdout:
 Would output `pizza_time: 12.500000` to stdout.
 
 
+### Annotated Typedefs
+
+Typedefs can be annotated so that the typedef can be used in serialization and deserialization, preserving their
+typedef-ed type.  Annotated typedefs can be created using the following macro, this defines the typedef for you.
+
+    ANNOTATED_TYPEDEF(float, MyFloat);
+
+Annotated typedefs can be used for any type or struct which is also annotated.
+
+
 ### Annotated Structs
 
 The serialize and deserialization of data types can be used on struct types as well.  To use a struct it must be
@@ -90,4 +100,3 @@ use it to save and load data from a file.
 
 Currently the following items are not implemented, hopefully they will be in the future:
 - Arrays / Strings
-- Fully fledged typedefs:  Currently you can typedef one of the built in types: uint32_t, int32_t, float, bool, char

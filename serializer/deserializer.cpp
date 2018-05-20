@@ -356,25 +356,23 @@ parse_value_tokens(String text, TokenArray tokens, TokenArrayRange token_range, 
   // printf("Tokens for %.*s value: ", STR_PRINT(type_name));  print_token_range_string(text, tokens, token_range);  printf("\n");
 
   StructAnnotation *struct_annotation = get_struct_annotation(struct_annotations, type_name);
-
-  String deserializable_type_name = type_name;
-
-  if (struct_annotation != NULL &&
-      struct_annotation->type_alias)
+  String aliased_type_name = type_name;
+  while (struct_annotation != NULL &&
+         struct_annotation->type_alias)
   {
-    deserializable_type_name = struct_annotation->aliased_type;
-    struct_annotation = NULL;
+    aliased_type_name = struct_annotation->aliased_type;
+    struct_annotation = get_struct_annotation(struct_annotations, aliased_type_name);
   }
 
   if (struct_annotation == NULL)
   {
-    success &= parse_atomic_type_tokens(text, tokens, token_range, deserializable_type_name, result);
+    success &= parse_atomic_type_tokens(text, tokens, token_range, aliased_type_name, result);
   }
   else
   {
     // Parse "struct type_name {...}"
 
-    TokenArrayRange struct_contents_range = get_struct_contents(text, tokens, token_range, struct_annotation->type_name);
+    TokenArrayRange struct_contents_range = get_struct_contents(text, tokens, token_range, type_name);
     if (struct_contents_range.start_token == -1)
     {
       success = false;

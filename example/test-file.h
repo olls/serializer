@@ -6,7 +6,7 @@
 #include "../serializer/struct-annotator.h"
 
 
-ANNOTATED_TYPEDEF(float, real);
+ANNOTATED_TYPEDEF(r32, real);
 
 
 #define vec2_DEF(MEMBER, n) \
@@ -15,9 +15,11 @@ ANNOTATED_TYPEDEF(float, real);
 
 ANNOTATED_STRUCT(vec2, vec2_DEF);
 
+ANNOTATED_TYPEDEF(vec2, MyAwesomeVector);
+
 
 #define Entity_DEF(M, n) \
-  M(vec2, position, n) \
+  M(MyAwesomeVector, position, n) \
   M(vec2, velocity, n) \
   M(u32, id, n) \
   M(char, letter, n)
