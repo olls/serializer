@@ -17,34 +17,46 @@ print_struct_annotation(const char *struct_annotation_name, FILE *output, Struct
 {
   StructAnnotation *struct_annotation = get_struct_annotation(struct_annotations, struct_annotation_name);
 
-  if (struct_annotation == NULL)
+  const char *aliased_type_name = struct_annotation_name;
+  const char *type_name_alias = struct_annotation_name;
+  while (struct_annotation != NULL &&
+         struct_annotation->type_alias)
   {
-    printf("%s", struct_annotation_name);
+    aliased_type_name = struct_annotation->aliased_type;
+    struct_annotation = get_struct_annotation(struct_annotations, aliased_type_name);
+  }
+
+  if (struct_annotation != NULL)
+  {
+    printf("struct ");
+  }
+
+  if (aliased_type_name == type_name_alias)
+  {
+    printf("%s", type_name_alias);
   }
   else
   {
-    if (struct_annotation->type_alias)
+    printf("(%s -> %s)", type_name_alias, aliased_type_name);
+  }
+
+  if (struct_annotation != NULL)
+  {
+    printf(" {\n");
+
+    for (u32 member_i = 0;
+         member_i < struct_annotation->members.n_elements;
+         ++member_i)
     {
-      printf("(%s -> %s)", struct_annotation->type_name, struct_annotation->aliased_type);
+      StructAnnotationMember& member = struct_annotation->members[member_i];
+      printf("%*s", 2*(indent + 1), "");
+
+      print_struct_annotation(member.type_name, output, struct_annotations, indent + 1);
+
+      printf(" %s;\n", member.label);
     }
-    else
-    {
-      printf("struct %s {\n", struct_annotation->type_name);
 
-      for (u32 member_i = 0;
-           member_i < struct_annotation->members.n_elements;
-           ++member_i)
-      {
-        StructAnnotationMember& member = struct_annotation->members[member_i];
-        printf("%*s", 2*(indent + 1), "");
-
-        print_struct_annotation(member.type_name, output, struct_annotations, indent + 1);
-
-        printf(" %s;\n", member.label);
-      }
-
-      printf("%*s}", 2*indent, "");
-    }
+    printf("%*s}", 2*indent, "");
   }
 
   if (indent == 0)
