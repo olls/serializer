@@ -13,6 +13,15 @@ is_num(char character)
 
 
 b32
+is_hex(char character)
+{
+  return (is_num(character) ||
+          (character >= 'A' && character <= 'F') ||
+          (character >= 'a' && character <= 'f'));
+}
+
+
+b32
 parse_u32(String *text, u32 *result)
 {
   b32 success = true;
@@ -236,6 +245,47 @@ parse_char(String *text, char *result)
     else
     {
       text->current_position += 1;
+    }
+  }
+  else if (text->current_position + 2 < text->end &&
+           text->current_position[0] == '0' &&
+           text->current_position[1] == 'x')
+  {
+    text->current_position += 2;
+
+    const char *hex_start = text->current_position;
+    CONSUME_WHILE(*text, is_hex);
+    u32 hex_length = text->current_position - hex_start;
+    if (hex_length == 0)
+    {
+      success = false;
+    }
+    else
+    {
+      u32 hex_constant = 0;
+
+      for (u32 num_pos = 0;
+           num_pos < hex_length;
+           ++num_pos)
+      {
+        char digit_char = *(hex_start + num_pos);
+        u32 digit;
+        if (digit_char >= '0' && digit_char <= '9')
+        {
+          digit = digit_char - '0';
+        }
+        else if (digit_char >= 'A' && digit_char <= 'F')
+        {
+          digit = 10 + digit_char - 'A';
+        }
+        else if (digit_char >= 'a' && digit_char <= 'f')
+        {
+          digit = 10 + digit_char - 'a';
+        }
+
+        hex_constant += digit * pow(16, (hex_length - num_pos - 1));
+      }
+      *result = hex_constant;
     }
   }
   else
