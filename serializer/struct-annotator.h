@@ -10,6 +10,7 @@
 struct StructAnnotationMember
 {
   u32 offset;
+  u32 array_size;
   const char *type_name;
   const char *label;
 };
@@ -45,13 +46,27 @@ get_struct_annotation(StructAnnotations& struct_annotations, const char *annotat
 
 // Used to create the struct {...} definition for each member of the struct
 #define ANNOTATED_STRUCT_MEMBER_DEF(member_type, member_label, struct_name) member_type member_label;
+#define ANNOTATED_STRUCT_MEMBER_ARRAY_DEF(member_type, member_label, array_size, struct_name) member_type member_label[array_size];
 
 // Used to create the annotation for each member of the struct in the annotation function
-#define ANNOTATED_STRUCT_MEMBER_ANNOTATION(member_type, member_label, struct_name)\
+#define ANNOTATED_STRUCT_MEMBER_ANNOTATION(member_type, member_label, struct_name) \
 {                                                                                \
   StructAnnotationMember member = {};                                            \
                                                                                  \
   member.offset = offsetof(struct_name, member_label);                           \
+  member.array_size = 1;                                                         \
+  member.label = TOKEN_TO_STRING(member_label);                                  \
+  member.type_name = TOKEN_TO_STRING(member_type);                               \
+                                                                                 \
+  Array::add(annotation.members, member);                                        \
+}
+
+#define ANNOTATED_STRUCT_MEMBER_ARRAY_ANNOTATION(member_type, member_label, array_size_, struct_name) \
+{                                                                                \
+  StructAnnotationMember member = {};                                            \
+                                                                                 \
+  member.offset = offsetof(struct_name, member_label);                           \
+  member.array_size = array_size_;                                               \
   member.label = TOKEN_TO_STRING(member_label);                                  \
   member.type_name = TOKEN_TO_STRING(member_type);                               \
                                                                                  \
@@ -62,11 +77,11 @@ get_struct_annotation(StructAnnotations& struct_annotations, const char *annotat
 #define ANNOTATED_STRUCT(struct_name, struct_members)                            \
 struct struct_name                                                               \
 {                                                                                \
-  struct_members(ANNOTATED_STRUCT_MEMBER_DEF, struct_name)                       \
+  struct_members(ANNOTATED_STRUCT_MEMBER_DEF, ANNOTATED_STRUCT_MEMBER_ARRAY_DEF, struct_name) \
 };                                                                               \
                                                                                  \
 static const char *                                                              \
-add_annotated_##struct_name(StructAnnotations *struct_annotations)               \
+add_annotated__##struct_name(StructAnnotations *struct_annotations)              \
 {                                                                                \
   const char struct_name_str[] = TOKEN_TO_STRING(struct_name);                   \
                                                                                  \
@@ -79,19 +94,19 @@ add_annotated_##struct_name(StructAnnotations *struct_annotations)              
   annotation.members = {};                                                       \
   annotation.size = sizeof(struct_name);                                         \
                                                                                  \
-  struct_members(ANNOTATED_STRUCT_MEMBER_ANNOTATION, struct_name)                \
+  struct_members(ANNOTATED_STRUCT_MEMBER_ANNOTATION, ANNOTATED_STRUCT_MEMBER_ARRAY_ANNOTATION, struct_name) \
                                                                                  \
   return annotation.type_name;                                                   \
 }                                                                                \
                                                                                  \
-static const char *struct_name##_annotation_type_name = add_annotated_##struct_name(&global_struct_annotations)
+static const char *struct_name##__annotation_type_name = add_annotated__##struct_name(&global_struct_annotations)
 
 
 #define ANNOTATED_TYPEDEF(aliased_type_name, type_name_alias)                    \
 typedef aliased_type_name type_name_alias;                                       \
                                                                                  \
 static const char *                                                              \
-add_annotated_##type_name_alias(StructAnnotations *struct_annotations)           \
+add_annotated_typedef__##type_name_alias(StructAnnotations *struct_annotations)  \
 {                                                                                \
   const char type_name_alias_cstr[] = TOKEN_TO_STRING(type_name_alias);          \
                                                                                  \
@@ -107,7 +122,7 @@ add_annotated_##type_name_alias(StructAnnotations *struct_annotations)          
   return annotation.type_name;                                                   \
 }                                                                                \
                                                                                  \
-static const char *type_name_alias##_annotation_type_name = add_annotated_##type_name_alias(&global_struct_annotations)
+static const char *type_name_alias##__annotation_type_name = add_annotated_typedef__##type_name_alias(&global_struct_annotations)
 
 
 void

@@ -53,7 +53,12 @@ print_struct_annotation(const char *struct_annotation_name, FILE *output, Struct
 
       print_struct_annotation(member.type_name, output, struct_annotations, indent + 1);
 
-      printf(" %s;\n", member.label);
+      printf(" %s", member.label);
+      if (member.array_size > 1)
+      {
+        printf("[%d]", member.array_size);
+      }
+      printf(";\n");
     }
 
     printf("%*s}", 2*indent, "");

@@ -7,7 +7,7 @@
 
 
 void
-serialize_data(const char *type_name, const char *label, void *data, FILE *output = stdout, StructAnnotations& struct_annotations = global_struct_annotations, u32 indent = 0);
+serialize_data(const char *type_name, const char *label, void *data, FILE *output = stdout, u32 array_size = 1, StructAnnotations& struct_annotations = global_struct_annotations, u32 indent = 0);
 
 
 #endif
