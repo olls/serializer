@@ -2,173 +2,18 @@
 
 #include "value-parser.h"
 #include "serializable-types.h"
-
-#include "../libs/fcpp-lexer-1.1/4cpp_lexer.h"
+#include "tokens.h"
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
-
-
-struct TokenArray
-{
-  CppLexer::Cpp_Token *tokens;
-  s32 count;
-};
-
-
-struct TokenArrayRange
-{
-  s32 start_token;
-  s32 end_token; // Index of token outside the range
-};
-
-
-b32
-token_sequence_matches(TokenArray tokens, TokenArrayRange token_range, s32 sequence_length, CppLexer::Cpp_Token_Type *token_sequence)
-{
-  b32 result = true;
-
-  if (token_range.start_token + sequence_length > token_range.end_token)
-  {
-    result = false;
-  }
-  else
-  {
-    for (s32 token_offset = 0;
-         token_offset < sequence_length;
-         ++token_offset)
-    {
-      CppLexer::Cpp_Token token = tokens.tokens[token_range.start_token + token_offset];
-
-      if (token.type != token_sequence[token_offset])
-      {
-        result = false;
-        break;
-      }
-    }
-  }
-
-  return result;
-}
-
-
-inline String
-token_string(String text, CppLexer::Cpp_Token token)
-{
-  return (String){
-    .start = text.start + token.start,
-    .current_position = text.start + token.start,
-    .end = text.start + token.start + token.size
-  };
-}
-
-
-// Returns the position of the first token found at the same scope level as token_range.start_token.  Assuming the first
-//   token in the token_range is a start_scope result will be the next token past the matching end_scope.  (If the first
-//   token is not start_scope then the result will be equal to token_range.start_token)
-//
-s32
-find_end_scope_token(TokenArray tokens, TokenArrayRange token_range, CppLexer::Cpp_Token_Type start_scope, CppLexer::Cpp_Token_Type end_scope)
-{
-  s32 result = -1;
-
-  u32 open_braces_count = 0;
-  u32 close_braces_count = 0;
-
-  for (s32 token_index = token_range.start_token;
-       token_index < token_range.end_token;
-       ++token_index)
-  {
-    CppLexer::Cpp_Token_Type current_token_type = tokens.tokens[token_index].type;
-
-    b32 found_start_scope = current_token_type == start_scope;
-    b32 found_end_scope = current_token_type == end_scope;
-
-    if (found_start_scope)
-    {
-      open_braces_count += 1;
-    }
-    if (found_end_scope)
-    {
-      close_braces_count += 1;
-    }
-
-    if (found_end_scope &&
-        open_braces_count == close_braces_count)
-    {
-      result = token_index;
-      break;
-    }
-  }
-
-  return result;
-}
-
-
-s32
-skip_scoped_sections(TokenArray tokens, s32 token_index, s32 end_token)
-{
-  char error;
-
-  if (tokens.tokens[token_index].type == CppLexer::CPP_TOKEN_BRACE_OPEN)
-  {
-    error = '}';
-    token_index = find_end_scope_token(tokens, {token_index, end_token},
-                                       CppLexer::CPP_TOKEN_BRACE_OPEN,
-                                       CppLexer::CPP_TOKEN_BRACE_CLOSE);
-  }
-  else
-  if (tokens.tokens[token_index].type == CppLexer::CPP_TOKEN_BRACKET_OPEN)
-  {
-    error = ']';
-    token_index = find_end_scope_token(tokens, {token_index, end_token},
-                                       CppLexer::CPP_TOKEN_BRACKET_OPEN,
-                                       CppLexer::CPP_TOKEN_BRACKET_CLOSE);
-  }
-
-  if (token_index == -1)
-  {
-    printf("No matching %c found.\n", error);
-  }
-
-  return token_index;
-}
-
-
-TokenArrayRange
-find_next_token_at_matching_scope(TokenArray tokens, TokenArrayRange token_range, CppLexer::Cpp_Token_Type token_type)
-{
-  TokenArrayRange result = {-1};
-  s32 token_index = token_range.start_token;
-
-  while (token_index < token_range.end_token)
-  {
-    token_index = skip_scoped_sections(tokens, token_index, token_range.end_token);
-    if (token_index == -1)
-    {
-      break;
-    }
-
-    if (tokens.tokens[token_index].type == token_type)
-    {
-      result.start_token = token_range.start_token;
-      result.end_token = token_index;
-      break;
-    }
-
-    token_index += 1;
-  }
-
-  return result;
-}
 
 
 // Searches the token array for a matching 'type label =' at the current level scope of the passed in tokens, returns
 //   the token range of its value.
 //
-TokenArrayRange
-find_value_in_tokens(String text, TokenArray tokens, TokenArrayRange token_range, const char *type_name, const char *label, u32 array_size)
+TokenRange
+find_value_in_tokens(String text, CppLexer::Cpp_Token_Array tokens, TokenRange token_range, const char *type_name, const char *label, u32 array_size)
 {
-  TokenArrayRange result = {-1};
+  TokenRange result = {-1};
 
   assert(token_range.start_token >= 0);
   assert(token_range.end_token <= tokens.count);
@@ -281,10 +126,10 @@ find_value_in_tokens(String text, TokenArray tokens, TokenArrayRange token_range
 }
 
 
-TokenArrayRange
-get_struct_contents(String text, TokenArray tokens, TokenArrayRange token_range, const char *type_name)
+TokenRange
+get_struct_contents(String text, CppLexer::Cpp_Token_Array tokens, TokenRange token_range, const char *type_name)
 {
-  TokenArrayRange result = {-1};
+  TokenRange result = {-1};
 
   CppLexer::Cpp_Token_Type struct_decl_seq[] = {
     CppLexer::CPP_TOKEN_KEY_TYPE_DECLARATION,
@@ -311,10 +156,10 @@ get_struct_contents(String text, TokenArray tokens, TokenArrayRange token_range,
 }
 
 
-TokenArrayRange
-get_array_contents(TokenArray tokens, TokenArrayRange token_range)
+TokenRange
+get_array_contents(CppLexer::Cpp_Token_Array tokens, TokenRange token_range)
 {
-  TokenArrayRange result = {-1};
+  TokenRange result = {-1};
 
   if (token_range.start_token < token_range.end_token &&
       tokens.tokens[token_range.start_token].type == CppLexer::CPP_TOKEN_BRACKET_OPEN)
@@ -334,21 +179,8 @@ get_array_contents(TokenArray tokens, TokenArrayRange token_range)
 }
 
 
-void
-print_token_range_string(String text, TokenArray tokens, TokenArrayRange token_range)
-{
-  for (s32 token_index = token_range.start_token;
-       token_index < token_range.end_token;
-       ++token_index)
-  {
-    printf("%.*s ", STR_PRINT(token_string(text, tokens.tokens[token_index])));
-  }
-  printf("\n");
-}
-
-
 b32
-parse_atomic_type_tokens(String text, TokenArray tokens, TokenArrayRange token_range, const char *type_name, void *result)
+parse_atomic_type_tokens(String text, CppLexer::Cpp_Token_Array tokens, TokenRange token_range, const char *type_name, void *result)
 {
   b32 success = true;
 
@@ -455,7 +287,7 @@ parse_atomic_type_tokens(String text, TokenArray tokens, TokenArrayRange token_r
 
 
 b32
-parse_value_tokens(String text, TokenArray tokens, TokenArrayRange token_range, const char *type_name, u32 array_size, void *result, StructAnnotations& struct_annotations)
+parse_value_tokens(String text, CppLexer::Cpp_Token_Array tokens, TokenRange token_range, const char *type_name, u32 array_size, void *result, StructAnnotations& struct_annotations)
 {
   b32 success = true;
 
@@ -488,7 +320,7 @@ parse_value_tokens(String text, TokenArray tokens, TokenArrayRange token_range, 
     element_size = struct_annotation->size;
   }
 
-  TokenArrayRange remaining_value_range = token_range;
+  TokenRange remaining_value_range = token_range;
   if (array_size > 1)
   {
     // Get inner [...]
@@ -508,7 +340,7 @@ parse_value_tokens(String text, TokenArray tokens, TokenArrayRange token_range, 
       void *array_element_data = (u8*)result + (array_element_index * element_size);
 
       // Get token range for next element in array
-      TokenArrayRange single_value_contents_range = remaining_value_range;
+      TokenRange single_value_contents_range = remaining_value_range;
       if (array_size > 1 &&
           array_element_index < array_size - 1)
       {
@@ -530,7 +362,7 @@ parse_value_tokens(String text, TokenArray tokens, TokenArrayRange token_range, 
       {
         // Parse "struct type_name {...}"
 
-        TokenArrayRange struct_contents_range = get_struct_contents(text, tokens, single_value_contents_range, type_name);
+        TokenRange struct_contents_range = get_struct_contents(text, tokens, single_value_contents_range, type_name);
         if (struct_contents_range.start_token == -1)
         {
           success = false;
@@ -543,7 +375,7 @@ parse_value_tokens(String text, TokenArray tokens, TokenArrayRange token_range, 
           {
             StructAnnotationMember& member = struct_annotation->members[member_i];
 
-            TokenArrayRange member_value_tokens_range = find_value_in_tokens(text, tokens, struct_contents_range, member.type_name, member.label, member.array_size);
+            TokenRange member_value_tokens_range = find_value_in_tokens(text, tokens, struct_contents_range, member.type_name, member.label, member.array_size);
             if (member_value_tokens_range.start_token == -1)
             {
               success = false;
@@ -576,15 +408,10 @@ deserialize_value(String text, const char *type_name, const char *label, void *r
 
   // TODO:  Maybe don't regenerate the tokens every time the function is called, just once per file.
 
-  CppLexer::Cpp_Token_Array cpp_tokens = CppLexer::cpp_make_token_array(100);
-  CppLexer::cpp_lex_file((char *)text.start, STR_LENGTH(text), &cpp_tokens);
+  CppLexer::Cpp_Token_Array tokens = CppLexer::cpp_make_token_array(100);
+  CppLexer::cpp_lex_file((char *)text.start, STR_LENGTH(text), &tokens);
 
-  TokenArray tokens = {
-    .tokens = cpp_tokens.tokens,
-    .count = cpp_tokens.count
-  };
-
-  TokenArrayRange value_tokens_range = find_value_in_tokens(text, tokens, {0, tokens.count}, type_name, label, 1);
+  TokenRange value_tokens_range = find_value_in_tokens(text, tokens, {0, tokens.count}, type_name, label, 1);
   if (value_tokens_range.start_token == -1)
   {
     success = false;

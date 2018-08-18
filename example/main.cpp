@@ -5,6 +5,7 @@
 #include "../serializer/struct-annotator.h"
 #include "../serializer/serializer.h"
 #include "../serializer/deserializer.h"
+#include "../serializer/ast.h"
 
 #include "test-file.h"
 

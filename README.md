@@ -99,4 +99,6 @@ use it to save and load data from a file.
 ## Unimplemented features
 
 Currently the following items are not implemented, hopefully they will be in the future:
-- Arrays / Strings
+- Strings
+- Enums
+- Struct unions

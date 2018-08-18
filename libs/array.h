@@ -65,15 +65,22 @@ namespace Array
     // Static storage for small number of elements, prevents heap allocation for small arrays
     T static_elements[static_size];
 
-    T *elements;  // Pointer to array memory
+    T *heap_elements;  // Pointer to array memory
 
     // Constructor to zero members
-    Array(u32 initial_size = static_size, u32 _element_size = sizeof(T))
-      : array_size(0),
-        n_elements(0),
-        element_size(_element_size),
-        elements(0)
-    {}
+    // Array(u32 initial_size = static_size, u32 _element_size = sizeof(T))
+    //   : array_size(0),
+    //     n_elements(0),
+    //     element_size(_element_size),
+    //     heap_elements(0)
+    // {}
+
+    // Wrapper to switch between static_elements and heap_elements
+    T *
+    elements()
+    {
+      return heap_elements != 0 ? heap_elements : static_elements;
+    }
 
     // Convenience operators
 
@@ -122,22 +129,25 @@ namespace Array
     }
     else
     {
-      T *new_buffer = 0;
+      T *new_heap_elements = 0;
+      T *new_elements = 0;
 
       if (!dynamic_elem_size &&
           new_array_size <= ARRAY_DEFAULT_INITIAL_SIZE)
       {
         // Use static struct array if element_size isn't dynamic, and the new size fits in static
-        new_buffer = array.static_elements;
         new_array_size = ARRAY_DEFAULT_INITIAL_SIZE;
+        new_elements = array.static_elements;
       }
       else
       {
         // Allocate array on heap
-        new_buffer = (T *)ARRAY_ALLOCATE_SIZE(array.element_size, new_array_size);
+        new_heap_elements = (T *)ARRAY_ALLOCATE_SIZE(array.element_size, new_array_size);
+        new_elements = new_heap_elements;
       }
 
-      ARRAY_ASSERT(new_buffer != 0);
+      ARRAY_ASSERT(new_elements != 0);
+      ARRAY_MEMSET(new_elements, 0, (array.element_size * new_array_size));
 
       if (new_array_size > array.n_elements)
       {
@@ -150,19 +160,17 @@ namespace Array
         array.n_elements = new_array_size;
       }
 
-      // Don't copy if there wasn't a buffer previously allocated
-      if (array.elements != 0)
+      if (new_elements != array.elements())
       {
-        ARRAY_MEMCPY(new_buffer, array.elements, array.n_elements * array.element_size);
+        ARRAY_MEMCPY(new_elements, array.elements(), (array.n_elements * array.element_size));
       }
 
       // Free the old elements buffer, unless we were using the static_element buffer
-      if (array.elements != array.static_elements &&
-          array.elements != 0)
+      if (array.heap_elements != 0)
       {
-        ARRAY_FREE(array.elements);
+        ARRAY_FREE(array.heap_elements);
       }
-      array.elements = new_buffer;
+      array.heap_elements = new_heap_elements;
 
       array.array_size = new_array_size;
     }
@@ -239,7 +247,7 @@ namespace Array
     }
 
     // Have to do indexing in bytes to deal with dynamic element size
-    return (T *)((u8 *)array.elements + (index * array.element_size));
+    return (T *)((u8 *)array.elements() + (index * array.element_size));
   }
 
   // Searches the array for the index of the first element equal to the given element
